@@ -64,6 +64,8 @@ func (app *App) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	playlistName := "Spotification " + time.Now().Format(time.RFC3339)
 	playlist, _ := client.CreatePlaylistForUser(user.ID, playlistName, "", false)
 
+	foundCount := 0
+
 	// @TODO: Add preventions of hitting rate limit.
 	for _, track := range app.Tracks {
 		// @NOTE: Flags like "artist:" don't work unless the artist is the _exact_ name.
@@ -77,8 +79,12 @@ func (app *App) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		if len(searchResult.Tracks.Tracks) == 0 {
 			log.Print("Cannot find song for track", track)
 		} else {
+			foundCount++
 			// @TODO: Make array of ids and add in bulk of 100 (limit). This will help with api rate limit.
 			client.AddTracksToPlaylist(playlist.ID, searchResult.Tracks.Tracks[0].ID)
 		}
 	}
+
+	log.Print("Total mp3 tracks: " + len(app.Tracks))
+	log.Print("Added Spotify tracks: " + foundCount)
 }
