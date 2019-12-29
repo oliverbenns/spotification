@@ -57,6 +57,7 @@ func (app *App) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	musiclib.GetTracks(app.MusicLibPath, &app.Tracks)
 
 	client := app.Auth.NewClient(token)
+	client.AutoRetry = true
 
 	// @TODO: error handling.
 	user, _ := client.CurrentUser()
