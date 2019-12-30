@@ -87,9 +87,12 @@ func (app *App) FindSpotifyTracks() {
 			log.Print(err)
 		}
 
+		trackPrettyPrint := track.Artist + " - " + track.Name
+
 		if len(searchResult.Tracks.Tracks) == 0 {
-			log.Print("Cannot find song for track", track)
+			log.Println("❌ " + trackPrettyPrint)
 		} else {
+			log.Println("✅ " + trackPrettyPrint)
 			app.RemoteTrackIds = append(app.RemoteTrackIds, searchResult.Tracks.Tracks[0].ID)
 		}
 	}
