@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"time"
 )
@@ -78,7 +79,7 @@ func (app *App) CreateSpotifyPlaylist() {
 func (app *App) FindSpotifyTracks() {
 	for _, track := range app.Tracks {
 		// @NOTE: Flags like "artist:" don't work unless the artist is the _exact_ name.
-		query := track.Name + " " + track.Artist
+		query := StripSpecialCharacters(track.Name + " " + track.Artist)
 		searchResult, err := app.Client.Search(query, spotify.SearchTypeTrack)
 
 		if err != nil {
@@ -118,4 +119,12 @@ func (app *App) AddSpotifyTracks() {
 
 		index += increment
 	}
+}
+
+// @NOTE: The Spotify API does not respect special characters even though they are correct! E.g. Tomáš Dvořák does not work, but Tomas Dvorak does!
+// It also seems Spotify try to remove some special characters wherever possible, e.g. `Will Sparks - Ah Yeah!` is actually correct, but Spotify catalogues it without the exclamation.
+func StripSpecialCharacters(value string) string {
+	reg, _ := regexp.Compile("[^a-zA-Z0-9 ]+")
+
+	return reg.ReplaceAllString(value, "")
 }
