@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 )
 
@@ -17,6 +18,7 @@ var state = "abcd"
 
 type App struct {
 	Auth         spotify.Authenticator
+	Client       spotify.Client
 	MusicLibPath string
 	Tracks       []musiclib.Track
 }
@@ -45,8 +47,6 @@ func main() {
 }
 
 func (app *App) CallbackHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print("WORKING")
-
 	token, err := app.Auth.Token(state, r)
 	if err != nil {
 		log.Print(err)
@@ -56,21 +56,27 @@ func (app *App) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	musiclib.GetTracks(app.MusicLibPath, &app.Tracks)
 
-	client := app.Auth.NewClient(token)
-	client.AutoRetry = true
+	app.Client = app.Auth.NewClient(token)
+	app.Client.AutoRetry = true
+
+	app.AddSpotifyTracks()
+}
+
+func (app *App) AddSpotifyTracks() {
+	musiclib.GetTracks(app.MusicLibPath, &app.Tracks)
 
 	// @TODO: error handling.
-	user, _ := client.CurrentUser()
+	user, _ := app.Client.CurrentUser()
 	playlistName := "Spotification " + time.Now().Format(time.RFC3339)
-	playlist, _ := client.CreatePlaylistForUser(user.ID, playlistName, "", false)
+	playlist, _ := app.Client.CreatePlaylistForUser(user.ID, playlistName, "", false)
 
-	foundCount := 0
+	var trackIds []spotify.ID
 
 	// @TODO: Add preventions of hitting rate limit.
 	for _, track := range app.Tracks {
 		// @NOTE: Flags like "artist:" don't work unless the artist is the _exact_ name.
 		query := track.Name + " " + track.Artist
-		searchResult, err := client.Search(query, spotify.SearchTypeTrack)
+		searchResult, err := app.Client.Search(query, spotify.SearchTypeTrack)
 
 		if err != nil {
 			log.Print(err)
@@ -79,12 +85,13 @@ func (app *App) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		if len(searchResult.Tracks.Tracks) == 0 {
 			log.Print("Cannot find song for track", track)
 		} else {
-			foundCount++
-			// @TODO: Make array of ids and add in bulk of 100 (limit). This will help with api rate limit.
-			client.AddTracksToPlaylist(playlist.ID, searchResult.Tracks.Tracks[0].ID)
+			trackIds := append(trackIds, searchResult.Tracks.Tracks[0].ID)
 		}
 	}
 
-	log.Print("Total mp3 tracks: " + len(app.Tracks))
-	log.Print("Added Spotify tracks: " + foundCount)
+	// @NOTE: Add the tracks in bulk to reduce # of queries and aid with hitting api rate limit.
+	// app.Client.AddTracksToPlaylist(playlist.ID, searchResult.Tracks.Tracks[0].ID)
+
+	log.Print("Total mp3 tracks: " + strconv.Itoa(len(app.Tracks)))
+	log.Print("Added Spotify tracks: " + strconv.Itoa(len(trackIds)))
 }
