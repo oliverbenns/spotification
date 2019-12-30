@@ -4,14 +4,14 @@ Migrate mp3 tracks stored on disk to Spotify. It does this by parsing the file n
 
 This is different to _playing_ local mp3 files through the client which is what appears in most search results on this subject!!
 
-This is not what I wanted because:
+I wanted to find the Spotify tracks because:
 
-- I wanted to have my songs accessible on all devices
-- Clear up my hard disk space
-- Have the ability to share songs and playlists
-- Have all the album artwork and meta data all set and good in the client.
+- It allows the tracks to be accessible on all devices
+- Clears up my hard disk space
+- Gives the ability to share tracks and playlists
+- Have all the album artwork and meta data all set and good in the client
 
-It appears playing local files is also quite a hidden feature so I wouldn't be surprised if Spotify eventually drop support for this.
+It also appears playing local files is quite a hidden feature so I wouldn't be surprised if support for this is eventually dropped.
 
 ## Getting Started
 
