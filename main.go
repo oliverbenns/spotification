@@ -56,10 +56,10 @@ func (app *App) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	musiclib.GetTracks(app.MusicLibPath, &app.Tracks)
-
 	app.Client = app.Auth.NewClient(token)
 	app.Client.AutoRetry = true
+
+	musiclib.GetTracks(app.MusicLibPath, &app.Tracks)
 
 	app.CreateSpotifyPlaylist()
 	app.FindSpotifyTracks()
@@ -76,8 +76,6 @@ func (app *App) CreateSpotifyPlaylist() {
 }
 
 func (app *App) FindSpotifyTracks() {
-	musiclib.GetTracks(app.MusicLibPath, &app.Tracks)
-
 	for _, track := range app.Tracks {
 		// @NOTE: Flags like "artist:" don't work unless the artist is the _exact_ name.
 		query := track.Name + " " + track.Artist
