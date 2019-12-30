@@ -112,7 +112,11 @@ func (app *App) AddSpotifyTracks() {
 		}
 
 		ids := app.RemoteTrackIds[index : index+increment]
-		app.Client.AddTracksToPlaylist(app.Playlist.ID, ids...)
+		_, err := app.Client.AddTracksToPlaylist(app.Playlist.ID, ids...)
+
+		if err != nil {
+			log.Panic("Error adding ids to playlist", err)
+		}
 
 		index += increment
 	}
