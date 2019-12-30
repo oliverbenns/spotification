@@ -72,7 +72,7 @@ func (app *App) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 func (app *App) CreateSpotifyPlaylist() {
 	user, _ := app.Client.CurrentUser()
 	playlistName := "Spotification " + time.Now().Format(time.RFC3339)
-	app.Playlist, _ = app.Client.CreatePlaylistForUser(user.ID, playlistName, "", false)
+	app.Playlist, _ = app.Client.CreatePlaylistForUser(user.ID, playlistName, "Playlist created by https://github.com/oliverbenns/spotification", false)
 }
 
 func (app *App) FindSpotifyTracks() {
